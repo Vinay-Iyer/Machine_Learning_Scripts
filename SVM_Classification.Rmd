@@ -6,7 +6,7 @@ output: html_document
 
 ### Initialise 
 ```{r}
-setwd("C:/Users/Venkatramani/Desktop/Test")
+#setwd("C:/Users/Venkatramani/Desktop/Test")
 ```
 
 Load data
