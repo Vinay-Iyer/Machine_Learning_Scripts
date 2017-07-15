@@ -1,0 +1,137 @@
+---
+title: "SVM Classification"
+author: "Venkatramani Rajgpal"
+output: html_document
+---
+
+### Initialise 
+```{r}
+setwd("C:/Users/Venkatramani/Desktop/Test")
+```
+
+Load data
+```{r}
+data_c <- read.csv('classification_data.csv', header = TRUE)
+```
+
+Remove 8th cycle for the data. 
+```{r}
+data.new <- data_c[data_c$Cycle!=8,]
+```
+
+### Training a classification model for the target variable Result using Library `e1071`
+
+```{r}
+library(e1071)
+
+# Convert the two variables 'value0.1' and 'value0.2' into matrix form. 
+x = matrix(data.new$value.0.1,data.new$value.0.2,nrow = nrow(data.new), ncol = 2)
+
+# Map the target variable 'Result' to y. 
+y = c(data.new$Result)
+
+# Plot the result. #13 to equalise the x and y lengths. 
+plot(x, col=(13-y))
+```
+
+Fit the svm model using the 'radial' kernel. 
+
+```{r}
+dat=data.frame(x=x, y=as.factor(y))
+
+svmfit=svm(y~., data=dat, kernel="radial",scale=FALSE)
+plot(svmfit, dat)
+```
+
+
+Summary of the fitted svm using e1071. 
+
+```{r}
+summary(svmfit)
+```
+The model shows a low value of cost and a good gamma. 
+
+Run the prediction and the execution time. 
+
+```{r}
+pred <- predict(svmfit,x)
+system.time(pred <- predict(svmfit,x))
+```
+
+
+Finally. Lets tune the model using `tune()` to find the best cost and gamma. `tune()` performs ten-fold cross-validation on a set of models of interest.  
+
+```{r Tuning SVM}
+
+svm_tune <- tune(svm, train.x=x, train.y=y,kernel="radial", ranges=list(cost=c(0.001,0.01,0.1,1,5,10,100)))
+
+system.time(svm_tune <- tune(svm, train.x=x, train.y=y,kernel="radial", ranges=list(cost=c(0.001,0.01,0.1,1,5,10,100))))
+
+summary(svm_tune)
+```
+Tuning however takes unusually long time.
+We see that cost=0.01 results in the lowest cross-validation error rate. The `tune()` function stores the best model obtained, which can be accessed as below. 
+
+```{r}
+bestmod = svm_tune$best.model
+summary(bestmod)
+```
+
+Creating a svm model again with the tuned model and trying to refit the data. The results are as below. 
+
+```{r}
+
+svmfit.aftertune=svm(y~., data=dat, kernel="radial",cost=0.01,gamma=0.5,scale=FALSE)
+summary(svmfit.aftertune)
+```
+
+Run prediction again with new model. 
+
+```{r}
+pred.1 <- predict(svmfit.aftertune,x)
+system.time(pred.1 <- predict(svmfit.aftertune,x))
+```
+
+### Building the classification model using `kernlab`. 
+
+```{r}
+library(kernlab)
+m <- ksvm(x,y, data = data.train,kernel="rbfdot",C=1)
+m
+```
+
+Split the data into training set and test set for model evaluation. 
+
+```{r}
+# Set 80% as training set and 20% as test set. 
+dim(dat)
+data.train <- dat[1:1700,] 
+data.test <- dat[1701:2142,]  
+```
+
+Predicting the target varible "Result" with the test data set. 
+```{r}
+# Exclude the y variable from the test set to match the no of predictors.
+p <- predict(m,data.test[,-3],type="response")
+```
+
+We see the first few predictions.
+```{r}
+head(p)
+# Cross check if all the Result variable of the test set is predicted. 
+dim(p)
+```
+
+To examine how well the classifier performed, i compare the predicted Result to the true Result in the testing dataset. Using the `table()` function for this. 
+
+```{r}
+table <- table(p,data.test$y)
+```
+
+We see the last few predictions using the `tail()` function. 
+```{r}
+tail(table)
+```
+
+
+
