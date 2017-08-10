@@ -1,7 +1,8 @@
 ---
 title: "Titanic"
 author: "Venkatramani Rajgpal"
-output: html_document
+output: github_document
+keep_md: true
 ---
 ### Initialise
 ```{r}
