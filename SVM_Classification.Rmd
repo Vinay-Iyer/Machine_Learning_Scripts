@@ -1,7 +1,8 @@
 ---
 title: "SVM Classification"
 author: "Venkatramani Rajgpal"
-output: html_document
+output: github_document
+keep_md: true
 ---
 
 ### Initialise 
@@ -14,12 +15,12 @@ Load data
 data_c <- read.csv('classification_data.csv', header = TRUE)
 ```
 
-Remove 8th cycle for the data. 
+Remove 8th cycle from the data. 
 ```{r}
 data.new <- data_c[data_c$Cycle!=8,]
 ```
 
-### Training a classification model for the target variable Result using Library `e1071`
+### Training a classification model for the target variable 'Result' using Library `e1071`
 
 ```{r}
 library(e1071)
