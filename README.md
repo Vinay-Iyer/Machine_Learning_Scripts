@@ -8,7 +8,7 @@ This repository is meant to be a growing collection of interesting and useful al
 
 ## Table of Contents and Code Notebooks
 
-1. Linear Regression on Wine recognition data [[Code Notebook](/Wine_Analysis/Wine_Linear Regression.ipynb)] 
+1. Linear Regression on Wine recognition data [[Code Notebook](/Wine_Analysis/Wine_Linear Regression.ipynb) (https://github.com/Vinay-Iyer/Machine_Learning_Scripts/blob/master/Wine_Analysis/Wine_LinearRegression.ipynb)] 
 
  - This analysis is on the data which are the results of a chemical analysis of wines grown in the same region in Italy but derived from three different cultivars.
 The initial analysis is  a basic linear regression. 
