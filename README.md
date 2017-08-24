@@ -8,10 +8,11 @@ This repository is meant to be a growing collection of interesting and useful al
 
 ## Table of Contents and Code Notebooks
 
-1. Linear Regression on Wine recognition data [[ipnyb](/Wine_Analysis/Wine_Linear Regression.ipynb)] 
+1. Linear Regression on Wine recognition data [[notebook](https://github.com/Vinay-Iyer/Machine_Learning_Scripts/blob/master/Wine_Analysis/Wine_LinearRegression.ipynb)] 
 
  - This analysis is on the data which are the results of a chemical analysis of wines grown in the same region in Italy but derived from three different cultivars.
 The initial analysis is  a basic linear regression. 
 
-- Second part of the analysis is the implementation on TensorFlow.  
+- Second part of the analysis is the implementation in TensorFlow.  [[notebook](https://github.com/Vinay-Iyer/Machine_Learning_Scripts/blob/master/Wine_Analysis/Wine_Tensorflow_Notebook.ipynb)]
+	Fitting a linear regression through Tensorflow. 
 
