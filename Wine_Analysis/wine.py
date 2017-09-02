@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Aug  9 13:25:54 2017
+Created on Wed Aug  9 08:58:29 2017
 
 @author: venkatrajgopal
 """
@@ -16,6 +16,8 @@ from sklearn import datasets, linear_model
 import tensorflow as tf
 
 rng = np.random
+
+
 # Read the data and assign the attributes
 
 data = pd.read_csv('wine.dat',header=None)
@@ -27,7 +29,7 @@ data.describe()
 
 # extract explanatory and response variable. 
 X = data.loc[:,'Alcohol']
-Y = data.loc[:,'Malic acid']
+Y = data.loc[:,'Ash']
 
 # Split into training and test
 X_train = X[:-50]
@@ -37,16 +39,40 @@ X_test  = X[-50:]
 Y_train  = Y[:-50]
 Y_test   = Y[-50:]
 
+# Create linear regression object
+regr = linear_model.LinearRegression()
+
+# Train the model using the training sets
+regr.fit(X_train.to_frame(), Y_train.to_frame())
+
+#Predict
+regr.predict(X_test.to_frame())
+
+# The coefficients
+print('Coefficients: \n', regr.coef_)
+
+# Mean squared error
+print("Mean Squared Error: %.2f" \
+      %np.mean((regr.predict(X_test.to_frame() - X_test.to_frame()) ** 2)))
+
+# Explain Variance
+print('Variance score: %.2f' % regr.score(X_test.to_frame(), Y_test.to_frame()))
+
+# Plot Outputs
+plt.scatter(X_test.to_frame(),Y_test.to_frame(),color='red')
+plt.plot(X_test.to_frame(), regr.predict(X_test.to_frame()), color='blue')
+plt.xticks(())
+plt.yticks(())
+
+# -----------------------------------------------------------------------------
 # Regression using tensorflow. 
 
-train_X = np.array(X_train)
-train_Y = np.array(Y_train)
 
 # Initialize Parameters
-n_samples = train_X.shape[0]
-learning_rate = 0.1
+n_samples = X_train.shape[0]
+learning_rate = 0.001
 training_epochs = 100
-display_step = 50
+display_step = 1
 
 
 # Set placeholders 
@@ -75,23 +101,23 @@ with tf.Session() as sess:
     
     # Fit all training data
     for epoch in range(training_epochs):
-        for (x, y) in zip(train_X, train_Y):
+        for (x, y) in zip(X_train, Y_train):
             sess.run(optimizer, feed_dict={Xp: x, Yp: y})    
 
     # Display logs per epoch step
     if (epoch+1) % display_step == 0:
-        c = sess.run(cost,feed_dict={Xp: train_X, Yp:train_Y})
-        print ('Epoch:'), '%04d' % (epoch+1), "cost=", "{:.9f}".format(c), \
-         "W=", sess.run(W), "b=", sess.run(b)
+        c = sess.run(cost,feed_dict={Xp: X_train, Yp:Y_train})
+        print ("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(c), \
+         "W=", sess.run(W), "b=", sess.run(b) )
+        epoch = epoch + 1
                  
     
-    print ('Optimization Finished')
-    training_cost = sess.run(cost, feed_dict={Xp:train_X, Yp:train_Y})
-    print ("Training cost="), training_cost, "W=", sess.run(W), "b=", sess.run(b), '\n'        
-    
-   
+    print ("Optimization Finished")
+    training_cost = sess.run(cost, feed_dict={Xp:X_train, Yp:Y_train})
+    print ("Training cost=", training_cost, "W=", sess.run(W), "b=", sess.run(b) )        
+
 # Plots
-    plt.plot(train_X, train_Y, 'ro', label='Original data')
-    plt.plot(train_X, sess.run(W) * train_Y + sess.run(b), label='Fitted line')
+    plt.plot(X_train, Y_train, 'ro', label='Original data')
+    plt.plot(X_train, sess.run(W) * Y_train + sess.run(b), label='Fitted line')
     plt.legend()
     plt.show() 
