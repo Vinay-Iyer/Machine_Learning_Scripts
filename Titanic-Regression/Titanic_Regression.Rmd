@@ -1,0 +1,106 @@
+---
+title: "Titanic"
+author: "Venkatramani Rajgpal"
+output: github_document
+keep_md: true
+---
+### Initialise
+```{r}
+
+```
+
+
+```{r}
+# load the data
+data <- read.csv('titanic_training.csv', header = TRUE)
+```
+
+
+Exclude NA's. Check if row has NA's and remove them. 
+
+```{r}
+row.na <- apply(data, 1, function(x){any(is.na(x))})
+sum(row.na)
+data.filtered <- data[!row.na,]
+```
+
+### Check correlation between Age and Fare
+```{r}
+c <- cor.test(data.filtered$Age,data.filtered$Fare,method = "pearson") 
+c
+```
+We see 9.6% correlation between Age and the Fare. 
+
+
+
+### Check for independence.  
+We first create a contingency table
+```{r}
+tb1 = table(data.filtered$Survived,data.filtered$Pclass)
+tb1  # contingency table
+
+# Setting `correct=FALSE` to turn off Yates' continuity correction.
+chisq.test(tb1,correct = FALSE)
+
+tb2 = table(data.filtered$Survived,data.filtered$Sex)
+chisq.test(tb2)
+
+tb3 = table(data.filtered$Survived,data.filtered$Age)
+chisq.test(tb3)
+```
+The warning message found in the solution above is due to the small cell values in the contingency table. 
+
+
+### Plotting distributions of Age vs Gender
+```{r}
+plot(data.filtered$Age,data.filtered$Sex)
+```
+
+### Fitting a Logistic regression 
+
+Use `subset()` function and select only the relevant variables for the required Logistic regression model.  
+```{r}
+# Subsetting data for Survived ~ Pclass + Sex + Age + Fare.
+data.subset <- subset(data.filtered,select=c(2,3,5,6,10))
+```
+
+Split the data into training set and test set.
+```{r}
+train <- data.subset[1:650,]
+test <- data.subset[651:714,]
+```
+
+Logistic regression models the conditional probability, $P(Y = 1|X = x)$ as a function of $x$, that $Y$ belongs to a particular category. Expressing mathematically, 
+
+$\frac {\log p(x)}{1-p(x)}$ = $\beta_0 + X \beta_1$, where $p(x)$ = $P(y=1|x)$. 
+
+The unknown parameters,$\beta_0$, $\beta_1$ in the function are estimated by maximum likelihood method using available input training data. The Maximum likelihood function expresses the probability of the observed data as a function of the unknown parameters. 
+`glm()` takes training data as input and gives us the fitted model with estimated parameters as output. Fit the generalised linear model using `glm()` function. We take the Binomial parameter. 
+```{r}
+model <- glm(Survived ~ Pclass + Sex + Age + Fare,family=binomial(link='logit'),data=train)
+
+summary(model)
+```
+The statistically significant variables, sex has the lowest p-value suggesting a strong association of the sex of the passenger with the probability of having survived. 
+
+The negative coefficient for this predictor suggests that all other variables being equal, the male passenger is less likely to have survived. 
+
+Run a Anova on the model to analyse the table of deviation. 
+```{r}
+anova(model)
+```
+
+### Evaluation
+Predicting $y$ on the new test data set. 
+By setting the parameter type='response', output probabilities are in the form of $P(y=1|x)$. Taking decision boundary as 0.5 as threshold. If $P(y=1|x)>0.5$ then $y = 1$ otherwise $y=0$. 
+
+```{r}
+
+fitted.results <- predict(model,newdata=subset(test,type='response'))
+fitted.results <- ifelse(fitted.results > 0.5,1,0)
+
+misClasificError <- mean(fitted.results != test$Survived)
+print(paste('Accuracy',1-misClasificError))
+
+```
+We see a 81.5% accuracy that the test set is correctly classified. 
